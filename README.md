@@ -1,33 +1,93 @@
-# AWS WAFv2 Web ACL Terraform Module
+![license](https://img.shields.io/badge/License-MIT-orange?style=flat-square)
 
-Terraform module which creates a WAFv2 Web ACL on AWS and associates it with an Application Load Balancer (ALB).
+# 📦 terraform-aws-wafv2-web-acl
 
-## Features
+Terraform module to provision an AWS WAFv2 Web ACL and associate it with an Application Load Balancer (ALB).
+
+The module creates a Web ACL with a set of pre-configured AWS Managed Rules to protect your application from common web exploits. It handles the association with an existing ALB and provides visibility through CloudWatch metrics.
+
+## ⚙️ What This Module Does
 
 - Creates an AWS WAFv2 Web ACL.
 - Includes pre-configured AWS Managed Rules:
-  - **Common Rule Set**: Contains rules that are generally applicable to web applications.
-  - **SQL Injection Rule Set**: Contains rules to block request patterns associated with SQL injection attacks.
-  - **Known Bad Inputs Rule Set**: Contains rules to block request patterns that are known to be invalid and are associated with exploitation or discovery of vulnerabilities.
-- Automatic association with an ALB.
-- CloudWatch metrics and sampled requests visibility.
+  - **Common Rule Set**: Protection against common web exploits.
+  - **SQL Injection Rule Set**: Guards against SQLi attack patterns.
+  - **Known Bad Inputs Rule Set**: Blocks requests known to be invalid or associated with vulnerability discovery.
+- Automatically associates the Web ACL with a specified ALB.
+- Enables CloudWatch metrics and sampled requests for visibility.
+- Supports both `REGIONAL` and `CLOUDFRONT` scopes (defaulted to `REGIONAL`).
 
-## Usage
+## ⚠️ Important Notes
+
+- This module does not create the ALB; it requires an existing `alb_arn`.
+- Default action for requests that don't match any rules is set to `ALLOW`.
+- Web ACL capacity units (WCUs) are calculated based on the included rule sets.
+- Ensure the `scope` variable matches the resource type being protected.
+
+## 📑 Prerequisites
+
+Before using this module, you should already have:
+
+- An existing Application Load Balancer (ALB) if using `REGIONAL` scope.
+- AWS credentials configured for Terraform.
+- Appropriate permissions to create WAFv2 resources.
+
+## 🚀 Quick Start
 
 ```hcl
+provider "aws" {
+  region = "us-east-1"
+}
+
 module "waf_acl" {
-  source  = "smartao/wafv2-web-acl/aws"
-  version = "~> 1.0"
+  source = "sergeimatos/wafv2-web-acl/aws"
 
   name_prefix = "my-app"
   alb_arn     = "arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/app/my-load-balancer/50dc6c495c0c9188"
 
   common_tags = {
     Environment = "production"
-    Project     = "my-project"
+    Project     = "security-infrastructure"
   }
 }
 ```
+
+Run:
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+## 🔐 Security Guidance
+
+- **Managed Rules**: Regularly review the performance and matches of the AWS Managed Rules.
+- **Logging**: For full request visibility, consider enabling WAFv2 Logging to S3 or CloudWatch Logs (not currently implemented in this module).
+- **Default Action**: In highly sensitive environments, you might want to switch to a `block` default action and explicitly allow traffic, though this module currently defaults to `allow`.
+
+## 📁 Typical Use Case
+
+```text
+Internet
+    |
+    v
+AWS WAFv2 (Web ACL)
+    | (Filters malicious traffic)
+    v
+Application Load Balancer (ALB)
+    |
+    v
+Private Infrastructure
+  |- EC2 Instances
+  |- ECS Services
+  `- Lambda Functions
+```
+
+## 🧩 Example
+
+- [Simple example](examples/simple)
+- The `examples/simple` directory uses a local relative source for development and testing of this repository.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -41,7 +101,7 @@ module "waf_acl" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.37.0 |
 
 ## Modules
 
