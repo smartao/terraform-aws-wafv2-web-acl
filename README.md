@@ -2,9 +2,9 @@
 
 # 📦 terraform-aws-wafv2-web-acl
 
-Terraform module to provision an AWS WAFv2 Web ACL and associate it with an Application Load Balancer (ALB).
+Terraform module to provision an AWS WAFv2 Web ACL and associate it with an existing Application Load Balancer (ALB).
 
-The module creates a Web ACL with a set of pre-configured AWS Managed Rules to protect your application from common web exploits. It handles the association with an existing ALB and provides visibility through CloudWatch metrics.
+The module creates a Web ACL with a set of pre-configured AWS Managed Rules to protect your application from common web exploits. It associates the Web ACL with an existing ALB and provides visibility through CloudWatch metrics.
 
 ## ⚙️ What This Module Does
 
@@ -15,20 +15,20 @@ The module creates a Web ACL with a set of pre-configured AWS Managed Rules to p
   - **Known Bad Inputs Rule Set**: Blocks requests known to be invalid or associated with vulnerability discovery.
 - Automatically associates the Web ACL with a specified ALB.
 - Enables CloudWatch metrics and sampled requests for visibility.
-- Supports both `REGIONAL` and `CLOUDFRONT` scopes (defaulted to `REGIONAL`).
+- Supports `REGIONAL` scope for ALB protection.
 
 ## ⚠️ Important Notes
 
 - This module does not create the ALB; it requires an existing `alb_arn`.
 - Default action for requests that don't match any rules is set to `ALLOW`.
 - Web ACL capacity units (WCUs) are calculated based on the included rule sets.
-- Ensure the `scope` variable matches the resource type being protected.
+- This module is intended for ALB association and defaults to `REGIONAL` scope.
 
 ## 📑 Prerequisites
 
 Before using this module, you should already have:
 
-- An existing Application Load Balancer (ALB) if using `REGIONAL` scope.
+- An existing Application Load Balancer (ALB).
 - AWS credentials configured for Terraform.
 - Appropriate permissions to create WAFv2 resources.
 
@@ -86,8 +86,8 @@ Private Infrastructure
 
 ## 🧩 Example
 
-- [Simple example](examples/simple)
-- The `examples/simple` directory uses a local relative source for development and testing of this repository.
+- [Basic example](examples/basic)
+- The `examples/basic` directory uses a local relative source for development and testing of this repository.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -121,7 +121,7 @@ No modules.
 | <a name="input_alb_arn"></a> [alb\_arn](#input\_alb\_arn) | The ARN of the Application Load Balancer to associate with the WAF Web ACL | `string` | n/a | yes |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | A mapping of tags to assign to the resource | `map(string)` | `{}` | no |
 | <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Prefix to be used on all the resources as identifier | `string` | n/a | yes |
-| <a name="input_scope"></a> [scope](#input\_scope) | Specifies whether this is for an AWS CloudFront distribution or for a regional application | `string` | `"REGIONAL"` | no |
+| <a name="input_scope"></a> [scope](#input\_scope) | Scope for the Web ACL. This module is intended for REGIONAL use with ALB association. | `string` | `"REGIONAL"` | no |
 
 ## Outputs
 

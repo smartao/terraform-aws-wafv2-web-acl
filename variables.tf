@@ -9,7 +9,7 @@ variable "alb_arn" {
 }
 
 variable "scope" {
-  description = "Specifies whether this is for an AWS CloudFront distribution or for a regional application"
+  description = "Scope for the Web ACL. This module is intended for REGIONAL use with ALB association."
   type        = string
   default     = "REGIONAL"
   validation {
